@@ -18,7 +18,7 @@
         <div class="mb-6">
             <h1 class="text-3xl font-serif font-bold text-gray-900">
                 {{ $property['title'] ?? 'Untitled Property' }} 
-                <span class="text-gray-400 font-normal px-2">|</span> 
+                <span class="text-gray-400 font-normal px-2">|</span>
                 {{ $property['tags'][0] ?? $property['propertyType'] ?? 'Vacation Rental' }}
             </h1>
             
@@ -65,7 +65,80 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-12 items-start">
             
             <div class="lg:col-span-2 space-y-12">
+                <div class="pb-8 border-b border-gray-200">
+                    <h2 class="text-2xl font-serif font-bold mb-3 text-gray-900">
+                        {{ $property['roomType'] ?? 'Entire property' }} 
+                        @if(isset($property['propertyType']))
+                            ({{ $property['propertyType'] }})
+                        @endif
+                    </h2>
+                    
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-600 text-sm sm:text-base">
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            <span>{{ $property['accommodates'] ?? 0 }} guests</span>
+                        </div>
+                        <span class="text-gray-300 text-xs">•</span>
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                            <span>{{ $property['bedrooms'] ?? 0 }} bedrooms</span>
+                        </div>
+                        <span class="text-gray-300 text-xs">•</span>
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                            <span>{{ $property['beds'] ?? 0 }} beds</span>
+                        </div>
+                        <span class="text-gray-300 text-xs">•</span>
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            <span>{{ $property['bathrooms'] ?? 0 }} baths</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-xl font-serif font-bold mb-4">About the space</h3>
+                    <div class="prose prose-sm max-w-none text-gray-600 space-y-2 whitespace-pre-line">
+                        {{ $property['publicDescription']['summary'] ?? '' }}
+                    </div>
+                </div>
+
+                <!-- Amenities Section -->
+                @php
+                    $allAmenities = $property['amenities'] ?? [];
+                    $topAmenities = array_slice($allAmenities, 0, 9);
+                    $totalAmenities = count($allAmenities);
+                @endphp
                 
+                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-xl font-serif font-bold mb-6">What this place offers</h3>
+                    
+                    @if(!empty($allAmenities))
+                        <!-- Preview Grid (Top 9 Amenities) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+                            @foreach($topAmenities as $amenity)
+                                <div class="flex items-center text-gray-700 text-sm">
+                                    <svg class="w-5 h-5 mr-3 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="truncate" title="{{ $amenity }}">{{ $amenity }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        
+                        <!-- Show All Button -->
+                        @if($totalAmenities > 9)
+                            <button onclick="openAmenitiesModal()" class="mt-8 px-6 py-2.5 bg-white border border-gray-900 text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-semibold text-sm w-full sm:w-auto">
+                                Show all {{ $totalAmenities }} amenities
+                            </button>
+                        @endif
+                    @else
+                        <p class="text-gray-500 text-sm">No amenities listed for this property.</p>
+                    @endif
+                </div>
+
+                <!-- Availability Section -->
                 <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
                     <h2 class="text-2xl font-serif font-bold mb-2">Availability</h2>
                     <p class="text-gray-500 text-sm mb-6">View operating cycles and blackout thresholds below.</p>
@@ -113,13 +186,6 @@
                                 </div>
                             </div>
                         @endforeach
-                    </div>
-                </div>
-
-                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-                    <h3 class="text-xl font-serif font-bold mb-4">About the space</h3>
-                    <div class="prose prose-sm max-w-none text-gray-600 space-y-2 whitespace-pre-line">
-                        {{ $property['publicDescription']['summary'] ?? '' }}
                     </div>
                 </div>
             </div>
@@ -241,6 +307,33 @@
         <button onclick="navigateLightbox(1)" class="absolute right-4 md:right-8 text-white hover:text-gray-300 p-2 z-50 focus:outline-none bg-gray-900/40 rounded-full border border-white/10">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </button>
+    </div>
+
+    <!-- Amenities Modal -->
+    <div id="amenitiesModal" class="hidden fixed inset-0 bg-gray-950/50 z-50 flex items-center justify-center backdrop-blur-sm p-4 sm:p-6 transition-opacity">
+        <!-- Modal Container -->
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
+            
+            <!-- Sticky Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+                <h3 class="text-xl font-serif font-bold text-gray-900">What this place offers</h3>
+                <button onclick="closeAmenitiesModal()" class="text-gray-500 hover:text-gray-900 p-2 -mr-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Scrollable List -->
+            <div class="p-6 overflow-y-auto overscroll-contain">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                    @foreach($allAmenities as $amenity)
+                        <div class="flex items-start text-gray-700 text-sm pb-4 border-b border-gray-50 last:border-0 sm:border-0">
+                            <svg class="w-5 h-5 mr-3 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span class="leading-relaxed">{{ $amenity }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -479,6 +572,34 @@
         }
 
         guestsInput.addEventListener('change', evaluateRangeData);
+
+        /* --- Amenities Modal Logic --- */
+        const amenitiesModal = document.getElementById('amenitiesModal');
+
+        function openAmenitiesModal() {
+            amenitiesModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
+        }
+
+        function closeAmenitiesModal() {
+            amenitiesModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        // Close modal if user clicks the backdrop area outside the modal card
+        amenitiesModal.addEventListener('click', function(e) {
+            if (e.target === amenitiesModal) {
+                closeAmenitiesModal();
+            }
+        });
+        
+        // Ensure Escape key also closes the amenities modal (add this to your existing keydown listener)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (!amenitiesModal.classList.contains('hidden')) closeAmenitiesModal();
+                if (!document.getElementById('lightboxModal').classList.contains('hidden')) closeLightbox();
+            }
+        });
     </script>
 </body>
 </html>
