@@ -64,9 +64,9 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-12 items-start">
             
-            <div class="lg:col-span-2 space-y-12">
-                <div class="pb-8 border-b border-gray-200">
-                    <h2 class="text-2xl font-serif font-bold mb-3 text-gray-900">
+            <div class="lg:col-span-2 space-y-10">
+                <div class="pb-2 border-b border-gray-200">
+                    <h2 class="text-2xl font-serif font-bold mb-1 text-gray-900">
                         {{ $property['roomType'] ?? 'Entire property' }} 
                         @if(isset($property['propertyType']))
                             ({{ $property['propertyType'] }})
@@ -102,7 +102,7 @@
                 <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
                     <h3 class="text-xl font-serif font-bold mb-4">About the space</h3>
                     <div class="prose prose-sm max-w-none text-gray-600 space-y-2 whitespace-pre-line">
-                        {{ $property['publicDescription']['summary'] ?? '' }}
+                        {{ $property['publicDescription']['space'] ?? '' }}
                     </div>
                 </div>
 
@@ -114,7 +114,7 @@
                 @endphp
                 
                 <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-                    <h3 class="text-xl font-serif font-bold mb-6">What this place offers</h3>
+                    <h3 class="text-xl font-serif font-bold mb-4">What this place offers</h3>
                     
                     @if(!empty($allAmenities))
                         <!-- Preview Grid (Top 9 Amenities) -->
@@ -140,8 +140,7 @@
 
                 <!-- Availability Section -->
                 <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-                    <h2 class="text-2xl font-serif font-bold mb-2">Availability</h2>
-                    <p class="text-gray-500 text-sm mb-6">View operating cycles and blackout thresholds below.</p>
+                    <h2 class="text-xl font-serif font-bold mb-4">Availability</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         @foreach($monthsToRender as $month)
@@ -170,15 +169,14 @@
 
                                         <div class="py-2 flex items-center justify-center">
                                             @if($isPast)
-                                                <span class="text-gray-200 line-through cursor-not-allowed">{{ $day }}</span>
+                                                <span class="text-gray-200 cursor-not-allowed">{{ $day }}</span>
                                             @elseif($isAvailable)
                                                 <span class="w-7 h-7 flex items-center justify-center font-medium text-gray-800 rounded-full bg-emerald-50/40 text-emerald-700 border border-emerald-100/40">
                                                     {{ $day }}
                                                 </span>
                                             @else
-                                                <span class="relative w-7 h-7 flex items-center justify-center text-gray-300 select-none bg-gray-50 rounded-full">
+                                                <span class="w-7 h-7 flex items-center justify-center text-gray-300 select-none bg-gray-50 rounded-full">
                                                     {{ $day }}
-                                                    <span class="absolute text-gray-200 font-light text-sm">/</span>
                                                 </span>
                                             @endif
                                         </div>
@@ -186,6 +184,13 @@
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-xl font-serif font-bold mb-4">Access</h3>
+                    <div class="prose prose-sm max-w-none text-gray-600 space-y-2 whitespace-pre-line">
+                        {{ $property['publicDescription']['access'] ?? '' }}
                     </div>
                 </div>
             </div>
@@ -238,7 +243,7 @@
 
                                                 <div class="py-0.5 relative group">
                                                     @if($isPast || !$isAvailable)
-                                                        <button type="button" disabled class="w-full aspect-square flex items-center justify-center font-medium text-gray-300 line-through bg-gray-50/50 rounded-full cursor-not-allowed select-none text-[11px]">
+                                                        <button type="button" disabled class="w-full aspect-square flex items-center justify-center font-medium text-gray-300 bg-gray-50/50 rounded-full cursor-not-allowed select-none text-[11px]">
                                                             {{ $day }}
                                                         </button>
                                                     @else
