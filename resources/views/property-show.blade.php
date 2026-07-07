@@ -125,45 +125,98 @@
             </div>
 
             <div class="lg:col-span-1 lg:sticky lg:top-6">
-                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm space-y-6">
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-xl space-y-6 relative">
                     <div>
-                        <span class="text-2xl font-bold">${{ $property['prices']['basePrice'] ?? 0 }}</span>
+                        <span class="text-2xl font-extrabold tracking-tight">${{ $property['prices']['basePrice'] ?? 0 }}</span>
                         <span class="text-gray-500 text-sm">/ night</span>
                     </div>
 
-                    <div class="border border-gray-200 rounded-lg divide-y divide-gray-200 overflow-hidden">
-                        <div class="grid grid-cols-2 divide-x divide-gray-200">
-                            <div class="p-3">
-                                <label class="block text-[10px] font-bold uppercase text-gray-500">Check-In</label>
-                                <input type="date" id="checkInDate" min="{{ date('Y-m-d') }}" class="w-full text-sm font-medium focus:outline-none mt-0.5 text-gray-700 bg-transparent">
+                    <div class="relative">
+                        <div id="pickerTrigger" class="border border-gray-300 rounded-xl grid grid-cols-2 divide-x divide-gray-300 overflow-hidden cursor-pointer hover:border-gray-400 focus-within:ring-2 focus-within:ring-gray-900 transition-all">
+                            <div class="p-3.5 select-none">
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Check-In</label>
+                                <div id="checkInDisplay" class="text-sm font-medium text-gray-400 mt-0.5">Add date</div>
                             </div>
-                            <div class="p-3">
-                                <label class="block text-[10px] font-bold uppercase text-gray-500">Check-Out</label>
-                                <input type="date" id="checkOutDate" min="{{ date('Y-m-d') }}" class="w-full text-sm font-medium focus:outline-none mt-0.5 text-gray-700 bg-transparent">
+                            <div class="p-3.5 select-none">
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Check-Out</label>
+                                <div id="checkOutDisplay" class="text-sm font-medium text-gray-400 mt-0.5">Add date</div>
                             </div>
                         </div>
-                        <div class="p-3">
-                            <label class="block text-[10px] font-bold uppercase text-gray-500">Guests</label>
-                            <select id="guestsCount" class="w-full text-sm font-medium focus:outline-none mt-0.5 text-gray-700 bg-transparent">
-                                @for($g = 1; $g <= ($property['accommodates'] ?? 4); $g++)
-                                    <option value="{{ $g }}">{{ $g }} {{ $g === 1 ? 'Guest' : 'Guests' }}</option>
-                                @endfor
-                            </select>
+
+                        <input type="hidden" id="checkInDate" name="check_in_date">
+                        <input type="hidden" id="checkOutDate" name="check_out_date">
+
+                        <div id="calendarDropdown" class="hidden absolute right-0 lg:-right-4 mt-2 w-[320px] sm:w-[600px] bg-white border border-gray-100 rounded-2xl shadow-2xl p-4 sm:p-6 z-40 space-y-6 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                @foreach($monthsToRender as $monthIndex => $month)
+                                    <div>
+                                        <h4 class="text-sm font-bold text-gray-800 mb-4 text-center select-none">
+                                            {{ $month->format('F Y') }}
+                                        </h4>
+                                        <div class="grid grid-cols-7 text-center text-[11px] font-bold text-gray-400 mb-2 pb-1 border-b border-gray-50 uppercase tracking-wider">
+                                            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                                        </div>
+                                        <div class="grid grid-cols-7 text-center text-xs gap-y-1">
+                                            @for($i = 0; $i < $month->dayOfWeek; $i++)
+                                                <div class="py-1.5"></div>
+                                            @endfor
+
+                                            @for($day = 1; $day <= $month->daysInMonth; $day++)
+                                                @php
+                                                    $currentLoopDate = $month->copy()->day($day);
+                                                    $dateStr = $currentLoopDate->format('Y-m-d');
+                                                    $isPast = $currentLoopDate->isBefore(\Carbon\Carbon::today());
+                                                    $status = (!$isPast && isset($calendarData[$dateStr])) ? $calendarData[$dateStr] : 'unavailable';
+                                                    $isAvailable = ($status === 'available');
+                                                @endphp
+
+                                                <div class="py-0.5 relative group">
+                                                    @if($isPast || !$isAvailable)
+                                                        <button type="button" disabled class="w-full aspect-square flex items-center justify-center font-medium text-gray-300 line-through bg-gray-50/50 rounded-full cursor-not-allowed select-none text-[11px]">
+                                                            {{ $day }}
+                                                        </button>
+                                                    @else
+                                                        <button type="button" 
+                                                                data-date="{{ $dateStr }}"
+                                                                class="picker-day-btn w-full aspect-square flex items-center justify-center font-semibold text-gray-700 rounded-full hover:bg-gray-900 hover:text-white transition-all text-[11px] relative z-10">
+                                                            {{ $day }}
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            
+                            <div class="flex justify-between items-center pt-4 border-t border-gray-100 text-xs text-gray-400 select-none">
+                                <div>Select check-in date first</div>
+                                <button type="button" id="clearDatesBtn" class="text-gray-600 font-semibold underline hover:text-gray-900 transition-colors">Clear dates</button>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="validationAlert" class="hidden text-xs font-medium p-3 bg-rose-50 text-rose-600 rounded-lg border border-rose-100"></div>
+                    <div class="border border-gray-300 rounded-xl p-3.5 focus-within:ring-2 focus-within:ring-gray-900 transition-all">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Guests</label>
+                        <select id="guestsCount" class="w-full text-sm font-semibold focus:outline-none mt-1 text-gray-800 bg-transparent cursor-pointer">
+                            @for($g = 1; $g <= ($property['accommodates'] ?? 4); $g++)
+                                <option value="{{ $g }}">{{ $g }} {{ $g === 1 ? 'Guest' : 'Guests' }}</option>
+                            @endfor
+                        </select>
+                    </div>
 
-                    <div id="invoiceBreakdown" class="hidden space-y-3 pt-2">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">Price Breakdown</h4>
-                        <div id="breakdownLines" class="space-y-2 text-sm text-gray-600"></div>
-                        <div class="border-t pt-3 flex justify-between font-semibold text-gray-900 text-base">
+                    <div id="validationAlert" class="hidden text-xs font-semibold p-3.5 bg-rose-50 text-rose-600 rounded-xl border border-rose-100 animate-pulse"></div>
+
+                    <div id="invoiceBreakdown" class="hidden space-y-4 pt-2 border-t border-gray-100">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400">Price Breakdown</h4>
+                        <div id="breakdownLines" class="space-y-2.5 text-sm font-medium text-gray-600"></div>
+                        <div class="border-t border-gray-100 pt-4 flex justify-between font-bold text-gray-900 text-base">
                             <span>Total</span>
                             <span id="calculatedTotal">$0.00</span>
                         </div>
                     </div>
 
-                    <button id="submitBookingBtn" disabled class="w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-center text-sm shadow-sm">
+                    <button id="submitBookingBtn" disabled class="w-full py-3.5 px-4 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all text-center text-sm shadow-md">
                         Check Availability
                     </button>
                 </div>
@@ -194,13 +247,23 @@
         const calendarMap = @json($calendarData);
         const propertyId = "{{ $property['_id'] }}";
         const quoteUrl = "{{ route('properties.quote', $property['_id']) }}";
-        
-        // Pass complete property picture paths down to client array collections
         const galleryImages = @json(array_map(fn($img) => $img['original'], $images));
         let activeImageIndex = 0;
 
-        const checkInInput = document.getElementById('checkInDate');
-        const checkOutInput = document.getElementById('checkOutDate');
+        // Custom Date Range State Variables
+        let selectedCheckIn = null;
+        let selectedCheckOut = null;
+
+        // UI Element Selectors
+        const pickerTrigger = document.getElementById('pickerTrigger');
+        const calendarDropdown = document.getElementById('calendarDropdown');
+        const checkInDisplay = document.getElementById('checkInDisplay');
+        const checkOutDisplay = document.getElementById('checkOutDisplay');
+        const hiddenCheckIn = document.getElementById('checkInDate');
+        const hiddenCheckOut = document.getElementById('checkOutDate');
+        const clearDatesBtn = document.getElementById('clearDatesBtn');
+        const dayButtons = document.querySelectorAll('.picker-day-btn');
+
         const guestsInput = document.getElementById('guestsCount');
         const validationAlert = document.getElementById('validationAlert');
         const invoiceBreakdown = document.getElementById('invoiceBreakdown');
@@ -208,74 +271,152 @@
         const calculatedTotal = document.getElementById('calculatedTotal');
         const submitBtn = document.getElementById('submitBookingBtn');
 
-        const lightboxModal = document.getElementById('lightboxModal');
-        const lightboxImage = document.getElementById('lightboxImage');
-        const lightboxCounter = document.getElementById('lightboxCounter');
-
-        /* --- Lightbox Functionality --- */
+        /* --- Lightbox Event Methods --- */
         function openLightbox(index) {
             if (!galleryImages || galleryImages.length === 0) return;
             activeImageIndex = index;
             updateLightboxContent();
-            lightboxModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
+            document.getElementById('lightboxModal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
         }
-
         function closeLightbox() {
-            lightboxModal.classList.add('hidden');
+            document.getElementById('lightboxModal').classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
         }
-
         function navigateLightbox(direction) {
             activeImageIndex += direction;
             if (activeImageIndex >= galleryImages.length) activeImageIndex = 0;
             if (activeImageIndex < 0) activeImageIndex = galleryImages.length - 1;
             updateLightboxContent();
         }
-
         function updateLightboxContent() {
-            lightboxImage.src = galleryImages[activeImageIndex];
-            lightboxCounter.textContent = `${activeImageIndex + 1} / ${galleryImages.length}`;
+            document.getElementById('lightboxImage').src = galleryImages[activeImageIndex];
+            document.getElementById('lightboxCounter').textContent = `${activeImageIndex + 1} / ${galleryImages.length}`;
         }
 
-        // Close lightbox if clicking outside the main image canvas area
-        lightboxModal.addEventListener('click', function(e) {
-            if (e.target === lightboxModal) {
-                closeLightbox();
+        /* --- Custom Range Picker Logic Engine --- */
+        
+        // Toggle calendar view
+        pickerTrigger.addEventListener('click', (e) => {
+            calendarDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!pickerTrigger.contains(e.target) && !calendarDropdown.contains(e.target)) {
+                calendarDropdown.classList.add('hidden');
             }
         });
 
-        // Add keyboard escape and arrow keys support
-        document.addEventListener('keydown', function(e) {
-            if (lightboxModal.classList.contains('hidden')) return;
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowRight') navigateLightbox(1);
-            if (e.key === 'ArrowLeft') navigateLightbox(-1);
+        // Loop over each selectable visual calendar cell
+        dayButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const clickedDateStr = button.getAttribute('data-date');
+
+                if (!selectedCheckIn || (selectedCheckIn && selectedCheckOut)) {
+                    // Step A: Set or Reset initial check-in point
+                    selectedCheckIn = clickedDateStr;
+                    selectedCheckOut = null;
+                } else if (selectedCheckIn && !selectedCheckOut) {
+                    // Step B: Set check-out point
+                    if (new Date(clickedDateStr) <= new Date(selectedCheckIn)) {
+                        // Flip values if selection falls chronologically backwards
+                        selectedCheckIn = clickedDateStr;
+                    } else {
+                        selectedCheckOut = clickedDateStr;
+                        calendarDropdown.classList.add('hidden'); // Auto-close on complete selection
+                    }
+                }
+
+                updateCalendarUIState();
+                evaluateRangeData();
+            });
+        });
+
+        function updateCalendarUIState() {
+            dayButtons.forEach(btn => {
+                const dateStr = btn.getAttribute('data-date');
+                const btnDate = new Date(dateStr);
+                
+                // Clear any leftover inline visual configurations
+                btn.className = "picker-day-btn w-full aspect-square flex items-center justify-center font-semibold text-gray-700 rounded-full hover:bg-gray-900 hover:text-white transition-all text-[11px] relative z-10";
+                btn.parentElement.className = "py-0.5 relative group";
+
+                if (selectedCheckIn && dateStr === selectedCheckIn) {
+                    // Style check-in day
+                    btn.className += " bg-gray-900 text-white rounded-full";
+                } else if (selectedCheckOut && dateStr === selectedCheckOut) {
+                    // Style check-out day
+                    btn.className += " bg-gray-900 text-white rounded-full";
+                } else if (selectedCheckIn && selectedCheckOut && btnDate > new Date(selectedCheckIn) && btnDate < new Date(selectedCheckOut)) {
+                    // Style structural gap rows spanning mid-range dates elegantly
+                    btn.className += " bg-gray-100 text-gray-900 rounded-none hover:bg-gray-200";
+                    btn.parentElement.className += " bg-gray-100";
+                }
+            });
+
+            // Sync visual string placeholders
+            if (selectedCheckIn) {
+                checkInDisplay.textContent = formatDateLabel(selectedCheckIn);
+                checkInDisplay.classList.remove('text-gray-400');
+                checkInDisplay.classList.add('text-gray-800');
+                hiddenCheckIn.value = selectedCheckIn;
+            } else {
+                checkInDisplay.textContent = "Add date";
+                checkInDisplay.classList.replace('text-gray-800', 'text-gray-400');
+                hiddenCheckIn.value = "";
+            }
+
+            if (selectedCheckOut) {
+                checkOutDisplay.textContent = formatDateLabel(selectedCheckOut);
+                checkOutDisplay.classList.remove('text-gray-400');
+                checkOutDisplay.classList.add('text-gray-800');
+                hiddenCheckOut.value = selectedCheckOut;
+            } else {
+                checkOutDisplay.textContent = "Add date";
+                checkOutDisplay.classList.replace('text-gray-800', 'text-gray-400');
+                hiddenCheckOut.value = "";
+            }
+        }
+
+        function formatDateLabel(dateString) {
+            const parts = dateString.split('-');
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        clearDatesBtn.addEventListener('click', () => {
+            selectedCheckIn = null;
+            selectedCheckOut = null;
+            updateCalendarUIState();
+            evaluateRangeData();
         });
 
         /* --- Quote Validation Engine --- */
-        function evaluateInputs() {
-            const checkIn = checkInInput.value;
-            const checkOut = checkOutInput.value;
-            
+        function evaluateRangeData() {
             validationAlert.classList.add('hidden');
             submitBtn.disabled = true;
 
-            if (!checkIn || !checkOut) return;
-
-            if (calendarMap[checkIn] === 'unavailable' || calendarMap[checkOut] === 'unavailable') {
-                showError("The selected checkout range contains unavailable date windows.");
+            if (!selectedCheckIn || !selectedCheckOut) {
                 invoiceBreakdown.classList.add('hidden');
                 return;
             }
 
-            if (new Date(checkIn) >= new Date(checkOut)) {
-                showError("Check-out selection date must fall after the check-in timestamp.");
-                invoiceBreakdown.classList.add('hidden');
-                return;
+            // Loop checking through user selections locally to make sure it doesn't overlap bookings
+            let parserDate = new Date(selectedCheckIn);
+            const endDate = new Date(selectedCheckOut);
+            
+            while (parserDate < endDate) {
+                const stepStr = parserDate.toISOString().split('T')[0];
+                if (calendarMap[stepStr] === 'unavailable') {
+                    showError("The selected range overlaps with existing bookings.");
+                    invoiceBreakdown.classList.add('hidden');
+                    return;
+                }
+                parserDate.setDate(parserDate.getDate() + 1);
             }
 
-            fetchQuoteBreakdown(checkIn, checkOut, guestsInput.value);
+            fetchQuoteBreakdown(selectedCheckIn, selectedCheckOut, guestsInput.value);
         }
 
         function fetchQuoteBreakdown(checkIn, checkOut, guests) {
@@ -316,10 +457,10 @@
             
             ratePlanNode.invoiceItems.forEach(item => {
                 const row = document.createElement('div');
-                row.className = 'flex justify-between items-center text-gray-600';
+                row.className = 'flex justify-between items-center text-gray-600 font-medium';
                 row.innerHTML = `
-                    <span class="capitalize">${item.title.toLowerCase().replace(/_/g, ' ')}</span>
-                    <span class="font-medium">$${parseFloat(item.amount).toFixed(2)}</span>
+                    <span class="capitalize text-gray-500">${item.title.toLowerCase().replace(/_/g, ' ')}</span>
+                    <span class="text-gray-900">$${parseFloat(item.amount).toFixed(2)}</span>
                 `;
                 breakdownLines.appendChild(row);
             });
@@ -337,9 +478,7 @@
             validationAlert.classList.remove('hidden');
         }
 
-        [checkInInput, checkOutInput, guestsInput].forEach(el => {
-            el.addEventListener('change', evaluateInputs);
-        });
+        guestsInput.addEventListener('change', evaluateRangeData);
     </script>
 </body>
 </html>
