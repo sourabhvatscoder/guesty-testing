@@ -11,9 +11,77 @@
         .font-serif { font-family: 'Playfair Display', serif; }
     </style>
 </head>
-<body class="text-gray-900 antialiased py-10 px-4 sm:px-6 lg:px-8">
+<body class="text-gray-900 antialiased py-4 px-4 sm:px-6 lg:px-8 lg:py-8">
 
-    <div class="max-w-6xl mx-auto">
+    <header class="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <div class="flex-shrink-0">
+                    <a href="/" class="font-serif text-2xl font-bold tracking-tight text-gray-900 hover:opacity-90 transition-opacity">
+                        Swiss<span class="text-gray-400 font-light"> Vacation Houses</span>
+                    </a>
+                </div>
+
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="text-sm font-medium text-gray-900 border-b-2 border-gray-900 pb-1 pt-0.5 transition-all">
+                        Home
+                    </a>
+                    <a href="/" class="text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-200 pb-1 pt-0.5 transition-all">
+                        Accommodations
+                    </a>
+                    <a href="/resort-map" class="text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-200 pb-1 pt-0.5 transition-all">
+                        Resort Map
+                    </a>
+                    <a href="/contact" class="text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-200 pb-1 pt-0.5 transition-all">
+                        Contact
+                    </a>
+                </nav>
+
+                <div class="hidden md:flex items-center">
+                    <a href="/" class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors shadow-sm">
+                        Book Now
+                    </a>
+                </div>
+
+                <div class="flex md:hidden">
+                    <button type="button" id="mobileMenuToggle" class="inline-flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 focus:outline-none transition-colors">
+                        <svg id="hamburgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="mobileMenu" class="hidden md:hidden border-b border-gray-100 bg-white/95 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-200">
+            <div class="px-4 pt-2 pb-6 space-y-3 shadow-inner">
+                <a href="/" class="block px-3 py-2.5 text-base font-semibold text-gray-900 bg-gray-50 rounded-xl">
+                    Home
+                </a>
+                <a href="/" class="block px-3 py-2.5 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
+                    Accommodations
+                </a>
+                <a href="/resort-map" class="block px-3 py-2.5 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
+                    Resort Map
+                </a>
+                <a href="/contact" class="block px-3 py-2.5 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
+                    Contact
+                </a>
+                <div class="pt-4 px-3">
+                    <a href="/" class="block w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white font-semibold text-center rounded-xl text-sm shadow-sm transition-colors">
+                        Book Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto mt-12">
         
         <div class="mb-6">
             <h1 class="text-3xl font-serif font-bold text-gray-900">
@@ -569,6 +637,15 @@
             invoiceBreakdown.classList.remove('hidden');
             submitBtn.textContent = 'Reserve Space';
             submitBtn.disabled = false;
+
+            submitBtn.onclick = function() {
+                const checkIn = document.getElementById('checkInDate').value;
+                const checkOut = document.getElementById('checkOutDate').value;
+                const guests = document.getElementById('guestsCount').value;
+                
+                // Redirect securely to checkout page with URL parameters
+                window.location.href = `/checkout?listing_id=${propertyId}&check_in=${checkIn}&check_out=${checkOut}&guests=${guests}`;
+            };
         }
 
         function showError(msg) {

@@ -89,4 +89,42 @@ class PropertyController extends Controller
 
         return response()->json($response->json());
     }
+
+    public function checkout(Request $request)
+    {
+        // Require the essential booking parameters from the URL
+        $request->validate([
+            'listing_id' => 'required|string',
+            'check_in'   => 'required|date',
+            'check_out'  => 'required|date|after:check_in',
+            'guests'     => 'required|integer|min:1'
+        ]);
+
+        $id = $request->listing_id;
+
+        $response = Http::withToken(env('GUESTY_API_TOKEN'))
+            ->acceptJson()
+            ->get("https://booking.guesty.com/api/listings/{$id}");
+        if ($response->failed()) {
+            abort(404, 'Property not found.');
+        }
+
+        $property = $response->json();
+
+        $response = Http::withToken(env('GUESTY_API_TOKEN'))
+            ->acceptJson()
+            ->post('https://booking.guesty.com/api/reservations/quotes', [
+                'listingId'            => $id,
+                'checkInDateLocalized'  => $request->check_in,
+                'checkOutDateLocalized' => $request->check_out,
+                'guestsCount'          => (int)$request->guests
+            ]);
+        if ($response->failed()) {
+            return redirect()->back()->with('error', 'Dates are no longer available.');
+        }
+
+        $quote = $response->json();
+
+        return view('checkout', compact('property', 'quote', 'request'));
+    }
 }
