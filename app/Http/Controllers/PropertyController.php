@@ -8,6 +8,19 @@ use Carbon\Carbon;
 
 class PropertyController extends Controller
 {
+    public function home()
+    {
+        // Fetch data from the Guesty API with a limit of 3
+        $response = Http::withToken(env('GUESTY_API_TOKEN'))
+            ->acceptJson()
+            ->get('https://booking.guesty.com/api/listings?limit=3'); 
+
+        // Extract the data array (fallback to empty array if it fails)
+        $properties = $response->json('results') ?? []; 
+
+        return view('home', compact('properties'));
+    }
+
     public function index()
     {
         // Fetch data from the Guesty API with a limit of 50
@@ -126,5 +139,10 @@ class PropertyController extends Controller
         $quote = $response->json();
 
         return view('checkout', compact('property', 'quote', 'request'));
+    }
+
+    public function getActivities(Request $request)
+    {
+        return view('activities',);
     }
 }

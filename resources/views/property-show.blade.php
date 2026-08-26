@@ -1,85 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $property['title'] ?? 'Property Details' }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
-        .font-serif { font-family: 'Playfair Display', serif; }
-    </style>
-</head>
-<body class="text-gray-900 antialiased py-4 px-4 sm:px-6 lg:px-8 lg:py-8">
-
-    <header class="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-200">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                
-                <div class="flex-shrink-0">
-                    <a href="/" class="font-serif text-2xl font-bold tracking-tight text-gray-900 hover:opacity-90 transition-opacity">
-                        Swiss<span class="text-gray-400 font-light"> Vacation Houses</span>
-                    </a>
-                </div>
-
-                <nav class="hidden md:flex items-center space-x-8">
-                    <a href="/" class="text-sm font-medium text-gray-900 border-b-2 border-gray-900 pb-1 pt-0.5 transition-all">
-                        Home
-                    </a>
-                    <a href="/" class="text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-200 pb-1 pt-0.5 transition-all">
-                        Accommodations
-                    </a>
-                    <a href="/resort-map" class="text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-200 pb-1 pt-0.5 transition-all">
-                        Resort Map
-                    </a>
-                    <a href="/contact" class="text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent hover:border-gray-200 pb-1 pt-0.5 transition-all">
-                        Contact
-                    </a>
-                </nav>
-
-                <div class="hidden md:flex items-center">
-                    <a href="/" class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors shadow-sm">
-                        Book Now
-                    </a>
-                </div>
-
-                <div class="flex md:hidden">
-                    <button type="button" id="mobileMenuToggle" class="inline-flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 focus:outline-none transition-colors">
-                        <svg id="hamburgerIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                        <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-        <div id="mobileMenu" class="hidden md:hidden border-b border-gray-100 bg-white/95 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-200">
-            <div class="px-4 pt-2 pb-6 space-y-3 shadow-inner">
-                <a href="/" class="block px-3 py-2.5 text-base font-semibold text-gray-900 bg-gray-50 rounded-xl">
-                    Home
-                </a>
-                <a href="/" class="block px-3 py-2.5 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
-                    Accommodations
-                </a>
-                <a href="/resort-map" class="block px-3 py-2.5 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
-                    Resort Map
-                </a>
-                <a href="/contact" class="block px-3 py-2.5 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors">
-                    Contact
-                </a>
-                <div class="pt-4 px-3">
-                    <a href="/" class="block w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white font-semibold text-center rounded-xl text-sm shadow-sm transition-colors">
-                        Book Now
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+@extends('layouts.app')
+@section('title', $property['title'] ?? 'Property Details')
+@section('content')
 
     <div class="max-w-6xl mx-auto mt-12">
         
@@ -133,7 +54,15 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-12 items-start">
             
             <div class="lg:col-span-2 space-y-10">
-                <div class="pb-2 border-b border-gray-200">
+                <nav class="bg-[#d9d9d9] rounded-xl px-6 py-4 -mb-8 flex items-center gap-8 overflow-x-auto whitespace-nowrap scrollbar-hide shadow-sm">
+                    <a href="#section-summary" class="text-gray-900 hover:text-gray-600 font-medium text-sm md:text-base transition-colors">Summary</a>
+                    <a href="#section-amenities" class="text-gray-900 hover:text-gray-600 font-medium text-sm md:text-base transition-colors">Amenities</a>
+                    <a href="#section-space" class="text-gray-900 hover:text-gray-600 font-medium text-sm md:text-base transition-colors">Space</a>
+                    <a href="#section-access" class="text-gray-900 hover:text-gray-600 font-medium text-sm md:text-base transition-colors">Access</a>
+                    <a href="#section-availability" class="text-gray-900 hover:text-gray-600 font-medium text-sm md:text-base transition-colors">Availability</a>
+                </nav>
+
+                <div class="pb-2 border-b border-gray-200 scroll-mt-10" id="section-summary">
                     <h2 class="text-2xl font-serif font-bold mb-1 text-gray-900">
                         {{ $property['roomType'] ?? 'Entire property' }} 
                         @if(isset($property['propertyType']))
@@ -181,7 +110,7 @@
                     $totalAmenities = count($allAmenities);
                 @endphp
                 
-                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm scroll-mt-10" id="section-amenities">
                     <h3 class="text-xl font-serif font-bold mb-4">What this place offers</h3>
                     
                     @if(!empty($allAmenities))
@@ -207,7 +136,7 @@
                 </div>
 
                 <!-- Availability Section -->
-                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm scroll-mt-10" id="section-availability">
                     <h2 class="text-xl font-serif font-bold mb-4">Availability</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -255,7 +184,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm scroll-mt-10" id="section-access">
                     <h3 class="text-xl font-serif font-bold mb-4">Access</h3>
                     <div class="prose prose-sm max-w-none text-gray-600 space-y-2 whitespace-pre-line">
                         {{ $property['publicDescription']['access'] ?? '' }}
@@ -683,5 +612,4 @@
             }
         });
     </script>
-</body>
-</html>
+@endsection

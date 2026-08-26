@@ -25,11 +25,6 @@
             
             <!-- LEFT COLUMN: The Stepper Form -->
             <div class="lg:col-span-2 space-y-8">
-                <div id="guesty-tokenization-container"></div>
-                <button type="button" onclick="validate()" class="w-full px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all text-base shadow-lg flex justify-center items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    Pay Now
-                </button>
                 
                 <!-- STEP 1: GUEST INFORMATION -->
                 <div id="step1-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm transition-all duration-300">
@@ -76,68 +71,11 @@
                 <div id="step2-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm opacity-50 pointer-events-none transition-all duration-300">
                     <h2 class="text-xl font-bold mb-6">2. Payment & Billing</h2>
                     
-                    <div class="space-y-6">
-                        <!-- Card Details -->
-                        <div class="space-y-4">
-                            <h3 class="text-sm font-semibold text-gray-900 border-b pb-2">Credit Card Details</h3>
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Name on Card</label>
-                                <input type="text" id="cardName" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-colors">
-                                <p class="text-xs text-red-500 mt-1 hidden err-msg">Name on card is required</p>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Card Number</label>
-                                <input type="text" id="cardNumber" maxlength="19" placeholder="0000 0000 0000 0000" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-colors">
-                                <p class="text-xs text-red-500 mt-1 hidden err-msg">Enter a valid 16-digit card number</p>
-                            </div>
-                            <div class="grid grid-cols-3 gap-5">
-                                <div>
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Exp Month</label>
-                                    <input type="text" id="expMonth" maxlength="2" placeholder="MM" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none text-center">
-                                    <p class="text-xs text-red-500 mt-1 hidden err-msg">Invalid</p>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Exp Year</label>
-                                    <input type="text" id="expYear" maxlength="4" placeholder="YYYY" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none text-center">
-                                    <p class="text-xs text-red-500 mt-1 hidden err-msg">Invalid</p>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">CVV</label>
-                                    <input type="password" id="cvv" maxlength="4" placeholder="123" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none text-center">
-                                    <p class="text-xs text-red-500 mt-1 hidden err-msg">Invalid</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Billing Address -->
-                        <div class="space-y-4 pt-4">
-                            <h3 class="text-sm font-semibold text-gray-900 border-b pb-2">Billing Address</h3>
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Street Address</label>
-                                <input type="text" id="address" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-colors">
-                                <p class="text-xs text-red-500 mt-1 hidden err-msg">Address is required</p>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-5">
-                                <div class="sm:col-span-1">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">City</label>
-                                    <input type="text" id="city" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none">
-                                    <p class="text-xs text-red-500 mt-1 hidden err-msg">Required</p>
-                                </div>
-                                <div class="sm:col-span-1">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Zipcode</label>
-                                    <input type="text" id="zipcode" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none">
-                                    <p class="text-xs text-red-500 mt-1 hidden err-msg">Required</p>
-                                </div>
-                                <div class="col-span-2 sm:col-span-1">
-                                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Country</label>
-                                    <input type="text" id="country" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-gray-900 outline-none">
-                                    <p class="text-xs text-red-500 mt-1 hidden err-msg">Required</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        
-                    </div>
+                    <div id="guesty-tokenization-container"></div>
+                    <button type="button" onclick="validate()" class="w-full px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all text-base shadow-lg flex justify-center items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Pay Now
+                    </button>
                 </div>
             </div>
 
