@@ -25,6 +25,11 @@
             
             <!-- LEFT COLUMN: The Stepper Form -->
             <div class="lg:col-span-2 space-y-8">
+                <div id="guesty-tokenization-container"></div>
+                <button type="button" onclick="validate()" class="w-full px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all text-base shadow-lg flex justify-center items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    Pay Now
+                </button>
                 
                 <!-- STEP 1: GUEST INFORMATION -->
                 <div id="step1-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm transition-all duration-300">
@@ -131,12 +136,7 @@
                             </div>
                         </div>
 
-                        <div class="pt-6">
-                            <button type="button" onclick="validateStep2()" class="w-full px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all text-base shadow-lg flex justify-center items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                                Pay Now
-                            </button>
-                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -195,114 +195,305 @@
         </div>
     </div>
 
-    <!-- Javascript Validation Engine -->
-    <script>
-        // Utilities for validation
-        const setError = (id, show) => {
-            const el = document.getElementById(id);
-            const msg = el.nextElementSibling;
-            if (show) {
-                el.classList.add('input-error');
-                msg.classList.remove('hidden');
-            } else {
-                el.classList.remove('input-error');
-                msg.classList.add('hidden');
-            }
-        };
-
-        const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        const isValidPhone = (phone) => phone.replace(/[^0-9]/g,"").length >= 10;
+    <!-- Javascript Validation Engine & Guesty SDK Integration -->
+    <script type="module">
         
-        // Auto-format card number spaces
-        document.getElementById('cardNumber').addEventListener('input', function (e) {
-            e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
-        });
+        import { loadScript } from 'https://cdn.jsdelivr.net/npm/@guestyorg/tokenization-js@latest/+esm';
 
-        // STEP 1 VALIDATION
-        function validateStep1() {
-            let isValid = true;
-            
-            const fName = document.getElementById('firstName').value.trim();
-            const lName = document.getElementById('lastName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-
-            if (!fName) { setError('firstName', true); isValid = false; } else setError('firstName', false);
-            if (!lName) { setError('lastName', true); isValid = false; } else setError('lastName', false);
-            if (!isValidEmail(email)) { setError('email', true); isValid = false; } else setError('email', false);
-            if (!isValidPhone(phone)) { setError('phone', true); isValid = false; } else setError('phone', false);
-
-            if (isValid) {
-                // Collapse Step 1 slightly and show Success badge
-                document.getElementById('step1-form').classList.add('hidden');
-                document.getElementById('step1-success').classList.remove('hidden');
-                
-                // Activate Step 2
-                const step2 = document.getElementById('step2-container');
-                step2.classList.remove('opacity-50', 'pointer-events-none');
-                
-                // Scroll to Step 2 smoothly
-                step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+        try {
+            const guestyTokenization = await loadScript({ version: 'v2' });
+            console.log("Guesty Tokenization JS SDK loaded successfully:", guestyTokenization);
+            await guestyTokenization.render({
+                containerId: "guesty-tokenization-container",
+                providerId: "64e62e61f4eb00004905a7c7"
+            });
+        } catch (error) {
+            console.error("Error with Guesty Tokenization SDK:", error);
         }
 
-        // STEP 2 VALIDATION
-        function validateStep2() {
-            let isValid = true;
-            
-            const cardName = document.getElementById('cardName').value.trim();
-            const cardNum = document.getElementById('cardNumber').value.replace(/\s/g, '');
-            const expMonth = document.getElementById('expMonth').value.trim();
-            const expYear = document.getElementById('expYear').value.trim();
-            const cvv = document.getElementById('cvv').value.trim();
-            
-            const address = document.getElementById('address').value.trim();
-            const city = document.getElementById('city').value.trim();
-            const zip = document.getElementById('zipcode').value.trim();
-            const country = document.getElementById('country').value.trim();
-
-            // Card Validation
-            if (!cardName) { setError('cardName', true); isValid = false; } else setError('cardName', false);
-            if (cardNum.length < 15 || cardNum.length > 19 || isNaN(cardNum)) { setError('cardNumber', true); isValid = false; } else setError('cardNumber', false);
-            if (cvv.length < 3 || isNaN(cvv)) { setError('cvv', true); isValid = false; } else setError('cvv', false);
-            
-            // Expiry Validation
-            const currentYear = new Date().getFullYear();
-            const currentMonth = new Date().getMonth() + 1;
-            let validExpiry = true;
-            
-            if (expMonth < 1 || expMonth > 12 || isNaN(expMonth)) validExpiry = false;
-            if (expYear.length !== 4 || isNaN(expYear) || expYear < currentYear) validExpiry = false;
-            if (expYear == currentYear && expMonth < currentMonth) validExpiry = false;
-
-            if (!validExpiry) {
-                setError('expMonth', true);
-                setError('expYear', true);
-                isValid = false;
-            } else {
-                setError('expMonth', false);
-                setError('expYear', false);
-            }
-
-            // Billing Validation
-            if (!address) { setError('address', true); isValid = false; } else setError('address', false);
-            if (!city) { setError('city', true); isValid = false; } else setError('city', false);
-            if (!zip) { setError('zipcode', true); isValid = false; } else setError('zipcode', false);
-            if (!country) { setError('country', true); isValid = false; } else setError('country', false);
-
-            if (isValid) {
-                // Replace with actual form submission or API call
-                const btn = document.querySelector('button[onclick="validateStep2()"]');
-                btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
-                btn.disabled = true;
-                
-                // Simulate network request
-                setTimeout(() => {
-                    alert('Payment successful! Reservation confirmed.');
-                    // window.location.href = '/success';
-                }, 2000);
-            }
+        window.validate = function() {
+            guestyTokenization.validate();
+            var payload = {
+                amount: Number("{{ $quote['rates']['ratePlans'][0]['ratePlan']['money']['hostPayout'] ?? 0 }}"),
+                currency: "{{ $quote['rates']['ratePlans'][0]['ratePlan']['money']['currency'] ?? 'USD' }}",
+                listingId: "{{ $request->listing_id }}",
+                quoteId: "{{ $quote['_id'] }}",
+                guest: {
+                    firstName: 'test',
+                    lastName: 'test',
+                    email: 'test@example.com',
+                    phone: '1234567890'
+                }
+            };
+            var paymentResponse = guestyTokenization.submit(payload);
+            console.log("Payment Response:", paymentResponse);
         }
+
+        // Renders the Guesty tokenization form in the provided container element. The form is rendered in an iframe to ensure PCI compliance.
+        // Returns a Promise that resolves after the iframe is loaded or is rejected if the iframe fails to load.
+        // Options 
+        // containerId (required) The ID of the container element within which the iframe will be rendered. 
+        // providerId (required) The ID of the payment provider for which the form is rendered.
+        // onStatusChange (optional) A callback function to be called when the validity of the form changes. Boolean value will be passed as an argument
+
+        // var guestyTokenizationInstance = null;
+        // var guestyTokenizationFormContainer = document.getElementById('guesty-tokenization-form-container');
+        // var guestyTokenizationFormOptions = {
+        //     containerId: 'guesty-tokenization-form-container',
+        //     providerId: '64e62e61f4eb00004905a7c7',
+        // };
+
+        // loadScript().then(() => {
+        //     console.log("Guesty Tokenization SDK loaded successfully.");
+        //     guestyTokenizationInstance = guestyTokenization.render(guestyTokenizationFormOptions);
+        //     console.log("Guesty Tokenization form initialized:", guestyTokenizationInstance);
+        // }).catch((error) => {
+        //     console.error("Failed to load Guesty Tokenization SDK:", error);
+        // });
+
+        // const listingId = "{{ $request->listing_id }}";
+        // const quoteId = "{{ $quote['_id'] }}";
+        // const quoteTotalAmount = parseFloat("{{ $total ?? 0 }}");
+        // const quoteCurrency = "{{ $quote['rates']['ratePlans'][0]['ratePlan']['money']['currency'] ?? 'USD' }}";
+        // const successRedirectUrl = `${window.location.origin}/booking-success`;
+        // const failureRedirectUrl = `${window.location.origin}/booking-failed`;
+
+        // console.log("Checkout initialized. Listing ID:", listingId, "Total:", quoteTotalAmount, quoteCurrency);
+
+        // const setError = (id, show) => {
+        //     const el = document.getElementById(id);
+        //     const msg = el.nextElementSibling;
+        //     if (show) {
+        //         el.classList.add('input-error');
+        //         msg.classList.remove('hidden');
+        //     } else {
+        //         el.classList.remove('input-error');
+        //         msg.classList.add('hidden');
+        //     }
+        // };
+
+        // const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        // const isValidPhone = (phone) => phone.replace(/[^0-9]/g,"").length >= 10;
+        
+        // document.getElementById('cardNumber').addEventListener('input', function (e) {
+        //     e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+        // });
+
+        // window.validateStep1 = function() {
+        //     console.log("--- Step 1 Validation Started ---");
+        //     let isValid = true;
+            
+        //     const fName = document.getElementById('firstName').value.trim();
+        //     const lName = document.getElementById('lastName').value.trim();
+        //     const email = document.getElementById('email').value.trim();
+        //     const phone = document.getElementById('phone').value.trim();
+
+        //     if (!fName) { setError('firstName', true); isValid = false; } else setError('firstName', false);
+        //     if (!lName) { setError('lastName', true); isValid = false; } else setError('lastName', false);
+        //     if (!isValidEmail(email)) { setError('email', true); isValid = false; } else setError('email', false);
+        //     if (!isValidPhone(phone)) { setError('phone', true); isValid = false; } else setError('phone', false);
+
+        //     if (isValid) {
+        //         console.log("Step 1 Validated successfully. Proceeding to Step 2.");
+        //         document.getElementById('step1-form').classList.add('hidden');
+        //         document.getElementById('step1-success').classList.remove('hidden');
+                
+        //         const step2 = document.getElementById('step2-container');
+        //         step2.classList.remove('opacity-50', 'pointer-events-none');
+        //         document.getElementById('cardName').value = `${fName} ${lName}`;
+        //         step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        //     } else {
+        //         console.warn("Step 1 Validation failed. Check input fields.");
+        //     }
+        // };
+
+        // window.validateStep2 = async function() {
+        //     console.log("--- Step 2 Validation Started ---");
+        //     let isValid = true;
+            
+        //     const cardName = document.getElementById('cardName').value.trim();
+        //     const cardNum = document.getElementById('cardNumber').value.replace(/\s/g, ''); 
+        //     const expMonth = document.getElementById('expMonth').value.trim().padStart(2, '0');
+        //     const expYear = document.getElementById('expYear').value.trim();
+        //     const cvv = document.getElementById('cvv').value.trim();
+            
+        //     const address = document.getElementById('address').value.trim();
+        //     const city = document.getElementById('city').value.trim();
+        //     const zip = document.getElementById('zipcode').value.trim();
+        //     const country = document.getElementById('country').value.trim();
+
+        //     if (!cardName) { setError('cardName', true); isValid = false; } else setError('cardName', false);
+        //     if (cardNum.length < 15 || cardNum.length > 19 || isNaN(cardNum)) { setError('cardNumber', true); isValid = false; } else setError('cardNumber', false);
+        //     if (cvv.length < 3 || isNaN(cvv)) { setError('cvv', true); isValid = false; } else setError('cvv', false);
+            
+        //     const currentYear = new Date().getFullYear();
+        //     const currentMonth = new Date().getMonth() + 1;
+        //     let validExpiry = true;
+            
+        //     if (expMonth < 1 || expMonth > 12 || isNaN(expMonth)) validExpiry = false;
+        //     if (expYear.length !== 4 || isNaN(expYear) || expYear < currentYear) validExpiry = false;
+        //     if (expYear == currentYear && parseInt(expMonth) < currentMonth) validExpiry = false;
+
+        //     if (!validExpiry) {
+        //         setError('expMonth', true);
+        //         setError('expYear', true);
+        //         isValid = false;
+        //     } else {
+        //         setError('expMonth', false);
+        //         setError('expYear', false);
+        //     }
+
+        //     if (!address) { setError('address', true); isValid = false; } else setError('address', false);
+        //     if (!city) { setError('city', true); isValid = false; } else setError('city', false);
+        //     if (!zip) { setError('zipcode', true); isValid = false; } else setError('zipcode', false);
+        //     if (!country) { setError('country', true); isValid = false; } else setError('country', false);
+
+        //     if (!isValid) {
+        //         console.warn("Step 2 Local Validation failed. Check payment input fields.");
+        //         return;
+        //     }
+
+        //     const btn = document.querySelector('button[onclick="validateStep2()"]');
+        //     const originalBtnText = btn.innerHTML;
+        //     btn.innerHTML = `Processing Secure Payment...`;
+        //     btn.disabled = true;
+
+        //     const fName = document.getElementById('firstName').value.trim();
+        //     const lName = document.getElementById('lastName').value.trim();
+        //     const email = document.getElementById('email').value.trim();
+        //     const phone = document.getElementById('phone').value.trim();
+        //     const tokenizationPayload = {
+        //         amount: Number(quoteTotalAmount),
+        //         currency: quoteCurrency,
+        //         listingId: listingId,
+        //         quoteId: quoteId,
+        //         guest: {
+        //             firstName: fName,
+        //             lastName: lName,
+        //             email: email,
+        //             phone: phone
+        //         },
+                // card: {
+                //     number: cardNum,
+                //     exp_month: expMonth,
+                //     exp_year: expYear,
+                //     cvc: cvv
+                // },
+                // billing_details: {
+                //     name: cardName,
+                //     address: {
+                //         line1: address,
+                //         city: city,
+                //         postal_code: zip,
+                //         country: country
+                //     }
+                // },
+                // threeDS: {
+                //     amount: Number(quoteTotalAmount),
+                //     currency: quoteCurrency,
+                //     successURL: successRedirectUrl,
+                //     failureURL: failureRedirectUrl
+                // }
+        //     };
+
+        //     console.log("Local validation passed. Payload constructed:", JSON.parse(JSON.stringify(tokenizationPayload).replace(cardNum, '********' + cardNum.slice(-4))));
+
+        //     try {
+        //         console.log("Loading Guesty Tokenization SDK v2...");
+        //         const guestyTokenization = await loadScript({ version: 'v2' });
+        //         console.log("SDK Loaded successfully:", guestyTokenization);
+
+        //         console.log("Executing guestyTokenization.submit()...");
+                
+        //         // --- FIX: Changed from .tokenize() to .submit() ---
+        //         const response = await guestyTokenization.submit(tokenizationPayload);
+                
+        //         console.log("Tokenization Response SUCCESS:", response);
+
+        //         if (response.threeDS && response.threeDS.authURL) {
+        //             console.log("3D Secure Authentication required. Redirecting to:", response.threeDS.authURL);
+        //             window.location.href = response.threeDS.authURL;
+        //             return;
+        //         }
+
+        //         console.log("No 3DS required. Proceeding to backend reservation creation with Token:", response._id);
+        //         await createReservation(response._id);
+
+        //     } catch (error) {
+        //         // We are now logging the FULL error object to the console
+        //         console.error("=== TOKENIZATION FAILED ===");
+        //         console.error(error);
+                
+        //         // Show the specific error message returned by Guesty to the user
+        //         let errorMsg = "Payment Error: ";
+        //         if (error.message) {
+        //             errorMsg += error.message;
+        //         } else if (error.details) {
+        //             errorMsg += JSON.stringify(error.details);
+        //         } else {
+        //             errorMsg += JSON.stringify(error);
+        //         }
+                
+        //         alert(errorMsg);
+                
+        //         btn.innerHTML = originalBtnText;
+        //         btn.disabled = false;
+        //     }
+        // };
+
+        // async function createReservation(ccToken) {
+        //     console.log("--- Creating Final Reservation ---");
+        //     const fName = document.getElementById('firstName').value;
+        //     const lName = document.getElementById('lastName').value;
+        //     const email = document.getElementById('email').value;
+        //     const phone = document.getElementById('phone').value;
+            
+        //     const urlParams = new URLSearchParams(window.location.search);
+        //     const checkIn = urlParams.get('check_in');
+        //     const checkOut = urlParams.get('check_out');
+            
+        //     const backendPayload = {
+        //         listing_id: listingId,
+        //         check_in: checkIn,
+        //         check_out: checkOut,
+        //         guests: urlParams.get('guests'),
+        //         ccToken: ccToken,
+        //         guest: {
+        //             first_name: fName,
+        //             last_name: lName,
+        //             email: email,
+        //             phone: phone
+        //         }
+        //     };
+            
+        //     console.log("Submitting to Laravel backend:", backendPayload);
+
+        //     try {
+        //         const response = await fetch('/api/v1/reservations', {
+        //             method: 'POST',
+        //             headers: { 
+        //                 'Content-Type': 'application/json',
+        //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        //             },
+        //             body: JSON.stringify(backendPayload)
+        //         });
+
+        //         if (response.ok) {
+        //             console.log("Backend reservation SUCCESS!");
+        //             window.location.href = successRedirectUrl;
+        //         } else {
+        //             const err = await response.json();
+        //             console.error("Backend reservation FAILED:", err);
+        //             throw new Error(err.message || 'Error creating reservation on server.');
+        //         }
+        //     } catch (error) {
+        //         console.error("Reservation Error:", error);
+        //         alert(error.message);
+        //         const btn = document.querySelector('button[onclick="validateStep2()"]');
+        //         btn.innerHTML = `Pay Now`;
+        //         btn.disabled = false;
+        //     }
+        // }
     </script>
 </body>
 </html>
