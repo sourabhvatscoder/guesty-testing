@@ -11,8 +11,6 @@ class PropertyController extends Controller
     public function index()
     {
         // Fetch data from the Guesty API with a limit of 50
-        var_dump(env('GUESTY_API_TOKEN')); // Debug
-        die('Debugging GUESTY_API_TOKEN'); // Debug
         $response = Http::withToken(env('GUESTY_API_TOKEN'))
             ->acceptJson()
             ->get('https://booking.guesty.com/api/listings?limit=50'); 
