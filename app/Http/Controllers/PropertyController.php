@@ -21,12 +21,31 @@ class PropertyController extends Controller
         return view('home', compact('properties'));
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        // Fetch data from the Guesty API with a limit of 50
+        // Start building query parameters for Guesty API
+        $queryParams = ['limit' => 50];
+
+        if ($request->filled('city')) {
+            $queryParams['city'] = $request->city;
+        }
+        if ($request->filled('country')) {
+            $queryParams['country'] = $request->country;
+        }
+        if ($request->filled('minOccupancy')) {
+            $queryParams['minOccupancy'] = $request->minOccupancy;
+        }
+        if ($request->filled('checkIn')) {
+            $queryParams['checkIn'] = $request->checkIn;
+        }
+        if ($request->filled('checkOut')) {
+            $queryParams['checkOut'] = $request->checkOut;
+        }
+
+        // Fetch data from the Guesty API with filters
         $response = Http::withToken(env('GUESTY_API_TOKEN'))
             ->acceptJson()
-            ->get('https://booking.guesty.com/api/listings?limit=50'); 
+            ->get('https://booking.guesty.com/api/listings', $queryParams); 
 
         // Extract the data array (fallback to empty array if it fails)
         $properties = $response->json('results') ?? []; 

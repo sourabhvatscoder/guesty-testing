@@ -110,10 +110,11 @@
                     </div>
                     
                     <form id="searchForm" action="/properties" method="GET" class="hidden">
-                        <input type="hidden" name="location" id="searchLocation">
-                        <input type="hidden" name="check_in" id="searchCheckIn">
-                        <input type="hidden" name="check_out" id="searchCheckOut">
-                        <input type="hidden" name="guests" id="searchGuests" value="0">
+                        <input type="hidden" name="city" id="searchCity">
+                        <input type="hidden" name="country" id="searchCountry">
+                        <input type="hidden" name="checkIn" id="searchCheckIn">
+                        <input type="hidden" name="checkOut" id="searchCheckOut">
+                        <input type="hidden" name="minOccupancy" id="searchGuests" value="">
                     </form>
                 </div>
             </div>
@@ -300,7 +301,8 @@
             const guestToggle = document.getElementById('guestToggle');
             const guestDropdown = document.getElementById('guestDropdown');
             const destDisplay = document.getElementById('destDisplay');
-            const searchLocation = document.getElementById('searchLocation');
+            const searchCity = document.getElementById('searchCity');
+            const searchCountry = document.getElementById('searchCountry');
             
             // Dest dropdown toggle
             destToggle.addEventListener('click', function(e) {
@@ -327,7 +329,12 @@
                 destDisplay.textContent = city;
                 destDisplay.classList.remove('text-gray-400');
                 destDisplay.classList.add('text-gray-900');
-                searchLocation.value = city;
+                searchCity.value = city;
+                // Assuming state string like 'Florida, United States', we will extract 'United States'
+                // But since we know it's always 'United States', we can just hardcode or parse.
+                // The API expects 'United States', which is the part after the comma.
+                const country = state.split(',')[1]?.trim() || 'United States';
+                searchCountry.value = country;
                 destDropdown.classList.add('hidden');
             };
 
@@ -337,7 +344,7 @@
                 if (guestCount < 0) guestCount = 0;
                 
                 document.getElementById('guestCount').textContent = guestCount;
-                document.getElementById('searchGuests').value = guestCount;
+                document.getElementById('searchGuests').value = guestCount > 0 ? guestCount : '';
                 
                 const display = document.getElementById('guestDisplay');
                 if (guestCount === 0) {
