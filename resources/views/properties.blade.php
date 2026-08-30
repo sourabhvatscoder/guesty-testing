@@ -7,6 +7,10 @@
                 Your destination deserves the perfect launchpad. Swiss Vacation Houses offers a thoughtfully curated collection of stays. Experience unparalleled amenities, exceptional dining, and authentic local charm. Whether you are seeking five-star luxury or an exceptional value, discover your perfect home away from home today.
             </p>
         </div>
+        
+        <div class="mb-12">
+            @include('partials.search-bar')
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @forelse($properties as $property)
