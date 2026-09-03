@@ -54,12 +54,65 @@
                 </nav>
 
                 <div class="pb-2 border-b border-gray-200 scroll-mt-10" id="section-summary">
+                    @php
+                    $propTitle = $property['title'] ?? '';
+
+                    // Case-insensitive "does title contain any of these keywords" helper
+                    $containsAny = function ($haystack, array $needles) {
+                        foreach ($needles as $needle) {
+                            if (stripos($haystack, $needle) !== false) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    };
+
+                    // No subtitle shown for these
+                    $removePatterns = [
+                        'room 3', 'room 03',
+                        'room 4', 'room 04',
+                        'studio 1', 'studio 01',
+                        'studio 2', 'studio 02',
+                        'studio 5', 'studio 05',
+                    ];
+
+                    // Shown as "Room"
+                    $roomPatterns = ['cozy 4', 'paradise 3'];
+
+                    // Shown as "Studio"
+                    $studioPatterns = ['lodge 5', 'lodge5', 'the nest'];
+
+                    // Shown as "Entire Home"
+                    $entireHomePatterns = [
+                        'tiny house',
+                        'sumner lake house 2',
+                        'sumner lake house 3',
+                        'mount dora',
+                        'mt dora',
+                    ];
+
+                    $customSubtitle = null;
+
+                    if ($containsAny($propTitle, $removePatterns)) {
+                        $customSubtitle = false;
+                    } elseif ($containsAny($propTitle, $roomPatterns)) {
+                        $customSubtitle = 'Room';
+                    } elseif ($containsAny($propTitle, $studioPatterns)) {
+                        $customSubtitle = 'Studio';
+                    } elseif ($containsAny($propTitle, $entireHomePatterns) || stripos($propTitle, 'swiss') !== false) {
+                        $customSubtitle = 'Entire Home';
+                    } else {
+                        $roomType = $property['roomType'] ?? 'Entire property';
+                        $propType = isset($property['propertyType']) ? ' (' . $property['propertyType'] . ')' : '';
+                        $customSubtitle = $roomType . $propType;
+                    }
+                @endphp
+
+                    @if($customSubtitle !== false)
                     <h2 class="text-2xl font-serif font-bold mb-1 text-gray-900">
-                        {{ $property['roomType'] ?? 'Entire property' }} 
-                        @if(isset($property['propertyType']))
-                            ({{ $property['propertyType'] }})
-                        @endif
+                        {{ $customSubtitle }}
                     </h2>
+                    @endif
                     
                     <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-600 text-sm sm:text-base">
                         <div class="flex items-center">
