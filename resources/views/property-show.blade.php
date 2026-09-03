@@ -137,6 +137,16 @@
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                             <span>{{ $property['bathrooms'] ?? 0 }} baths</span>
                         </div>
+                        
+                        @if(in_array('Pets allowed', $property['amenities'] ?? []))
+                        <span class="text-gray-300 text-xs">•</span>
+                        <div class="flex items-center text-emerald-600 font-medium">
+                            <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 8.5c1.4 0 2.5-1.1 2.5-2.5S13.4 3.5 12 3.5 9.5 4.6 9.5 6 10.6 8.5 12 8.5zm-4.5 1c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zm9 0c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zM12 10.5c-3 0-6 2.5-6 6v3.5h12V16.5c0-3.5-3-6-6-6z"/>
+                            </svg>
+                            <span>Pet Friendly</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
