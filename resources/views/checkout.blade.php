@@ -26,7 +26,55 @@
             <!-- LEFT COLUMN: The Stepper Form -->
             <div class="lg:col-span-2 space-y-8">
                 
-                <!-- STEP 1: GUEST INFORMATION -->
+                @if(isset($upsells) && count($upsells) > 0)
+                <!-- ADD TO YOUR STAY (UPSELLS) -->
+                <div id="step-upsells-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm transition-all duration-300">
+                    <h2 class="text-xl font-bold mb-6">Add to your stay</h2>
+                    
+                    <div class="space-y-4">
+                        @foreach($upsells as $upsell)
+                        @php 
+                            // Extract basic details safely
+                            $upsellId = $upsell['_id'] ?? $upsell['id'] ?? uniqid('upsell_');
+                            $upsellTitle = $upsell['title'] ?? $upsell['name'] ?? 'Additional Service';
+                            $upsellDesc = $upsell['upsell']['description'] ?? '';
+                            $upsellPrice = $upsell['price'] ?? 0;
+                            $upsellImage = $upsell['upsell']['images'][0]['url'] ?? $upsell['image'] ?? null;
+                        @endphp
+                        <div class="flex flex-col sm:flex-row gap-4 border border-gray-100 p-4 rounded-xl items-center justify-between" id="upsell-card-{{ $upsellId }}">
+                            <div class="flex gap-4 items-center w-full sm:w-auto">
+                                @if($upsellImage)
+                                <img src="{{ $upsellImage }}" class="w-16 h-16 object-cover rounded-lg">
+                                @else
+                                <div class="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                </div>
+                                @endif
+                                <div>
+                                    <h4 class="font-bold text-gray-900">{{ $upsellTitle }}</h4>
+                                    @if($upsellDesc)
+                                    <p class="text-xs text-gray-500 mt-0.5 line-clamp-2 max-w-sm">{{ $upsellDesc }}</p>
+                                    @endif
+                                    <p class="text-emerald-600 font-semibold text-sm mt-1">
+                                        +${{ number_format((float)$upsellPrice, 2) }}
+                                    </p>
+                                </div>
+                            </div>
+                            <button type="button" 
+                                class="upsell-toggle-btn px-6 py-2 border border-emerald-600 text-emerald-600 rounded-lg text-sm font-bold hover:bg-emerald-50 transition-colors w-full sm:w-auto hover:text-emerald-700"
+                                data-id="{{ $upsellId }}"
+                                data-title="{{ $upsellTitle }}"
+                                data-price="{{ (float)$upsellPrice }}"
+                                onclick="toggleUpsell(this)">
+                                Add
+                            </button>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                <!-- GUEST INFORMATION -->
                 <div id="step1-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm transition-all duration-300">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-xl font-bold">1. Guest Information</h2>
@@ -61,65 +109,11 @@
                         
                         <div class="pt-4">
                             <button type="button" onclick="validateStep1()" class="w-full sm:w-auto px-8 py-3.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl transition-all text-sm shadow-md">
-                                Next: Additional Services
+                                Next: Payment Details
                             </button>
                         </div>
                     </div>
                 </div>
-
-                @if(isset($upsells) && count($upsells) > 0)
-                <!-- STEP 1.5: ADD TO YOUR STAY -->
-                <div id="step-upsells-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm opacity-50 pointer-events-none transition-all duration-300">
-                    <h2 class="text-xl font-bold mb-6">Add to your stay</h2>
-                    
-                    <div class="space-y-4">
-                        @foreach($upsells as $upsell)
-                        @php 
-                            // Extract basic details safely
-                            $upsellId = $upsell['_id'] ?? $upsell['id'] ?? uniqid('upsell_');
-                            $upsellTitle = $upsell['title'] ?? $upsell['name'] ?? 'Additional Service';
-                            $upsellDesc = $upsell['upsell']['description'] ?? '';
-                            $upsellPrice = $upsell['price'] ?? 0;
-                            $upsellImage = $upsell['upsell']['images'][0]['url'] ?? $upsell['image'] ?? null;
-                        @endphp
-                        <div class="flex flex-col sm:flex-row gap-4 border border-gray-100 p-4 rounded-xl items-center justify-between" id="upsell-card-{{ $upsellId }}">
-                            <div class="flex gap-4 items-center w-full sm:w-auto">
-                                @if($upsellImage)
-                                <img src="{{ $upsellImage }}" class="w-16 h-16 object-cover rounded-lg">
-                                @else
-                                <div class="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                </div>
-                                @endif
-                                <div>
-                                    <h4 class="font-bold text-gray-900">{{ $upsellTitle }}</h4>
-                                    @if($upsellDesc)
-                                    <p class="text-xs text-gray-500 mt-0.5 line-clamp-2 max-w-sm">{{ $upsellDesc }}</p>
-                                    @endif
-                                    <p class="text-emerald-600 font-semibold text-sm mt-1">
-                                        +${{ number_format((float)$upsellPrice, 2) }}
-                                    </p>
-                                </div>
-                            </div>
-                            <button type="button" 
-                                class="upsell-toggle-btn px-6 py-2 border border-emerald-600 text-emerald-600 rounded-lg text-sm font-bold hover:bg-emerald-50 transition-colors w-full sm:w-auto"
-                                data-id="{{ $upsellId }}"
-                                data-title="{{ $upsellTitle }}"
-                                data-price="{{ (float)$upsellPrice }}"
-                                onclick="toggleUpsell(this)">
-                                Add
-                            </button>
-                        </div>
-                        @endforeach
-                    </div>
-                    
-                    <div class="pt-6 mt-6 border-t border-gray-100">
-                        <button type="button" onclick="validateStepUpsells()" class="w-full sm:w-auto px-8 py-3.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl transition-all text-sm shadow-md">
-                            Next: Payment Details
-                        </button>
-                    </div>
-                </div>
-                @endif
 
                 <!-- STEP 2: PAYMENT INFORMATION -->
                 <div id="step2-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm opacity-50 pointer-events-none transition-all duration-300">
@@ -224,15 +218,9 @@
                 document.getElementById('step1-form').classList.add('hidden');
                 document.getElementById('step1-success').classList.remove('hidden');
                 
-                const stepUpsells = document.getElementById('step-upsells-container');
-                if (stepUpsells) {
-                    stepUpsells.classList.remove('opacity-50', 'pointer-events-none');
-                    stepUpsells.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } else {
-                    const step2 = document.getElementById('step2-container');
-                    step2.classList.remove('opacity-50', 'pointer-events-none');
-                    step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                const step2 = document.getElementById('step2-container');
+                step2.classList.remove('opacity-50', 'pointer-events-none');
+                step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         };
         
@@ -275,17 +263,6 @@
             document.getElementById('order-total-amount').textContent = '$' + newTotal.toFixed(2);
             window.checkoutTotalAmount = newTotal;
         };
-
-        window.validateStepUpsells = function() {
-            const stepUpsells = document.getElementById('step-upsells-container');
-            if (stepUpsells) {
-                stepUpsells.classList.add('opacity-50', 'pointer-events-none');
-            }
-            
-            const step2 = document.getElementById('step2-container');
-            step2.classList.remove('opacity-50', 'pointer-events-none');
-            step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
         
         window.checkoutTotalAmount = baseTotal;
     </script>
@@ -323,272 +300,6 @@
             var paymentResponse = guestyTokenization.submit(payload);
             console.log("Payment Response:", paymentResponse);
         }
-
-        // Renders the Guesty tokenization form in the provided container element. The form is rendered in an iframe to ensure PCI compliance.
-        // Returns a Promise that resolves after the iframe is loaded or is rejected if the iframe fails to load.
-        // Options 
-        // containerId (required) The ID of the container element within which the iframe will be rendered. 
-        // providerId (required) The ID of the payment provider for which the form is rendered.
-        // onStatusChange (optional) A callback function to be called when the validity of the form changes. Boolean value will be passed as an argument
-
-        // var guestyTokenizationInstance = null;
-        // var guestyTokenizationFormContainer = document.getElementById('guesty-tokenization-form-container');
-        // var guestyTokenizationFormOptions = {
-        //     containerId: 'guesty-tokenization-form-container',
-        //     providerId: '64e62e61f4eb00004905a7c7',
-        // };
-
-        // loadScript().then(() => {
-        //     console.log("Guesty Tokenization SDK loaded successfully.");
-        //     guestyTokenizationInstance = guestyTokenization.render(guestyTokenizationFormOptions);
-        //     console.log("Guesty Tokenization form initialized:", guestyTokenizationInstance);
-        // }).catch((error) => {
-        //     console.error("Failed to load Guesty Tokenization SDK:", error);
-        // });
-
-        // const listingId = "{{ $request->listing_id }}";
-        // const quoteId = "{{ $quote['_id'] }}";
-        // const quoteTotalAmount = parseFloat("{{ $total ?? 0 }}");
-        // const quoteCurrency = "{{ $quote['rates']['ratePlans'][0]['ratePlan']['money']['currency'] ?? 'USD' }}";
-        // const successRedirectUrl = `${window.location.origin}/booking-success`;
-        // const failureRedirectUrl = `${window.location.origin}/booking-failed`;
-
-        // console.log("Checkout initialized. Listing ID:", listingId, "Total:", quoteTotalAmount, quoteCurrency);
-
-        // const setError = (id, show) => {
-        //     const el = document.getElementById(id);
-        //     const msg = el.nextElementSibling;
-        //     if (show) {
-        //         el.classList.add('input-error');
-        //         msg.classList.remove('hidden');
-        //     } else {
-        //         el.classList.remove('input-error');
-        //         msg.classList.add('hidden');
-        //     }
-        // };
-
-        // const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        // const isValidPhone = (phone) => phone.replace(/[^0-9]/g,"").length >= 10;
-        
-        // document.getElementById('cardNumber').addEventListener('input', function (e) {
-        //     e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
-        // });
-
-        // window.validateStep1 = function() {
-        //     console.log("--- Step 1 Validation Started ---");
-        //     let isValid = true;
-            
-        //     const fName = document.getElementById('firstName').value.trim();
-        //     const lName = document.getElementById('lastName').value.trim();
-        //     const email = document.getElementById('email').value.trim();
-        //     const phone = document.getElementById('phone').value.trim();
-
-        //     if (!fName) { setError('firstName', true); isValid = false; } else setError('firstName', false);
-        //     if (!lName) { setError('lastName', true); isValid = false; } else setError('lastName', false);
-        //     if (!isValidEmail(email)) { setError('email', true); isValid = false; } else setError('email', false);
-        //     if (!isValidPhone(phone)) { setError('phone', true); isValid = false; } else setError('phone', false);
-
-        //     if (isValid) {
-        //         console.log("Step 1 Validated successfully. Proceeding to Step 2.");
-        //         document.getElementById('step1-form').classList.add('hidden');
-        //         document.getElementById('step1-success').classList.remove('hidden');
-                
-        //         const step2 = document.getElementById('step2-container');
-        //         step2.classList.remove('opacity-50', 'pointer-events-none');
-        //         document.getElementById('cardName').value = `${fName} ${lName}`;
-        //         step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        //     } else {
-        //         console.warn("Step 1 Validation failed. Check input fields.");
-        //     }
-        // };
-
-        // window.validateStep2 = async function() {
-        //     console.log("--- Step 2 Validation Started ---");
-        //     let isValid = true;
-            
-        //     const cardName = document.getElementById('cardName').value.trim();
-        //     const cardNum = document.getElementById('cardNumber').value.replace(/\s/g, ''); 
-        //     const expMonth = document.getElementById('expMonth').value.trim().padStart(2, '0');
-        //     const expYear = document.getElementById('expYear').value.trim();
-        //     const cvv = document.getElementById('cvv').value.trim();
-            
-        //     const address = document.getElementById('address').value.trim();
-        //     const city = document.getElementById('city').value.trim();
-        //     const zip = document.getElementById('zipcode').value.trim();
-        //     const country = document.getElementById('country').value.trim();
-
-        //     if (!cardName) { setError('cardName', true); isValid = false; } else setError('cardName', false);
-        //     if (cardNum.length < 15 || cardNum.length > 19 || isNaN(cardNum)) { setError('cardNumber', true); isValid = false; } else setError('cardNumber', false);
-        //     if (cvv.length < 3 || isNaN(cvv)) { setError('cvv', true); isValid = false; } else setError('cvv', false);
-            
-        //     const currentYear = new Date().getFullYear();
-        //     const currentMonth = new Date().getMonth() + 1;
-        //     let validExpiry = true;
-            
-        //     if (expMonth < 1 || expMonth > 12 || isNaN(expMonth)) validExpiry = false;
-        //     if (expYear.length !== 4 || isNaN(expYear) || expYear < currentYear) validExpiry = false;
-        //     if (expYear == currentYear && parseInt(expMonth) < currentMonth) validExpiry = false;
-
-        //     if (!validExpiry) {
-        //         setError('expMonth', true);
-        //         setError('expYear', true);
-        //         isValid = false;
-        //     } else {
-        //         setError('expMonth', false);
-        //         setError('expYear', false);
-        //     }
-
-        //     if (!address) { setError('address', true); isValid = false; } else setError('address', false);
-        //     if (!city) { setError('city', true); isValid = false; } else setError('city', false);
-        //     if (!zip) { setError('zipcode', true); isValid = false; } else setError('zipcode', false);
-        //     if (!country) { setError('country', true); isValid = false; } else setError('country', false);
-
-        //     if (!isValid) {
-        //         console.warn("Step 2 Local Validation failed. Check payment input fields.");
-        //         return;
-        //     }
-
-        //     const btn = document.querySelector('button[onclick="validateStep2()"]');
-        //     const originalBtnText = btn.innerHTML;
-        //     btn.innerHTML = `Processing Secure Payment...`;
-        //     btn.disabled = true;
-
-        //     const fName = document.getElementById('firstName').value.trim();
-        //     const lName = document.getElementById('lastName').value.trim();
-        //     const email = document.getElementById('email').value.trim();
-        //     const phone = document.getElementById('phone').value.trim();
-        //     const tokenizationPayload = {
-        //         amount: Number(quoteTotalAmount),
-        //         currency: quoteCurrency,
-        //         listingId: listingId,
-        //         quoteId: quoteId,
-        //         guest: {
-        //             firstName: fName,
-        //             lastName: lName,
-        //             email: email,
-        //             phone: phone
-        //         },
-                // card: {
-                //     number: cardNum,
-                //     exp_month: expMonth,
-                //     exp_year: expYear,
-                //     cvc: cvv
-                // },
-                // billing_details: {
-                //     name: cardName,
-                //     address: {
-                //         line1: address,
-                //         city: city,
-                //         postal_code: zip,
-                //         country: country
-                //     }
-                // },
-                // threeDS: {
-                //     amount: Number(quoteTotalAmount),
-                //     currency: quoteCurrency,
-                //     successURL: successRedirectUrl,
-                //     failureURL: failureRedirectUrl
-                // }
-        //     };
-
-        //     console.log("Local validation passed. Payload constructed:", JSON.parse(JSON.stringify(tokenizationPayload).replace(cardNum, '********' + cardNum.slice(-4))));
-
-        //     try {
-        //         console.log("Loading Guesty Tokenization SDK v2...");
-        //         const guestyTokenization = await loadScript({ version: 'v2' });
-        //         console.log("SDK Loaded successfully:", guestyTokenization);
-
-        //         console.log("Executing guestyTokenization.submit()...");
-                
-        //         // --- FIX: Changed from .tokenize() to .submit() ---
-        //         const response = await guestyTokenization.submit(tokenizationPayload);
-                
-        //         console.log("Tokenization Response SUCCESS:", response);
-
-        //         if (response.threeDS && response.threeDS.authURL) {
-        //             console.log("3D Secure Authentication required. Redirecting to:", response.threeDS.authURL);
-        //             window.location.href = response.threeDS.authURL;
-        //             return;
-        //         }
-
-        //         console.log("No 3DS required. Proceeding to backend reservation creation with Token:", response._id);
-        //         await createReservation(response._id);
-
-        //     } catch (error) {
-        //         // We are now logging the FULL error object to the console
-        //         console.error("=== TOKENIZATION FAILED ===");
-        //         console.error(error);
-                
-        //         // Show the specific error message returned by Guesty to the user
-        //         let errorMsg = "Payment Error: ";
-        //         if (error.message) {
-        //             errorMsg += error.message;
-        //         } else if (error.details) {
-        //             errorMsg += JSON.stringify(error.details);
-        //         } else {
-        //             errorMsg += JSON.stringify(error);
-        //         }
-                
-        //         alert(errorMsg);
-                
-        //         btn.innerHTML = originalBtnText;
-        //         btn.disabled = false;
-        //     }
-        // };
-
-        // async function createReservation(ccToken) {
-        //     console.log("--- Creating Final Reservation ---");
-        //     const fName = document.getElementById('firstName').value;
-        //     const lName = document.getElementById('lastName').value;
-        //     const email = document.getElementById('email').value;
-        //     const phone = document.getElementById('phone').value;
-            
-        //     const urlParams = new URLSearchParams(window.location.search);
-        //     const checkIn = urlParams.get('check_in');
-        //     const checkOut = urlParams.get('check_out');
-            
-        //     const backendPayload = {
-        //         listing_id: listingId,
-        //         check_in: checkIn,
-        //         check_out: checkOut,
-        //         guests: urlParams.get('guests'),
-        //         ccToken: ccToken,
-        //         guest: {
-        //             first_name: fName,
-        //             last_name: lName,
-        //             email: email,
-        //             phone: phone
-        //         }
-        //     };
-            
-        //     console.log("Submitting to Laravel backend:", backendPayload);
-
-        //     try {
-        //         const response = await fetch('/api/v1/reservations', {
-        //             method: 'POST',
-        //             headers: { 
-        //                 'Content-Type': 'application/json',
-        //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        //             },
-        //             body: JSON.stringify(backendPayload)
-        //         });
-
-        //         if (response.ok) {
-        //             console.log("Backend reservation SUCCESS!");
-        //             window.location.href = successRedirectUrl;
-        //         } else {
-        //             const err = await response.json();
-        //             console.error("Backend reservation FAILED:", err);
-        //             throw new Error(err.message || 'Error creating reservation on server.');
-        //         }
-        //     } catch (error) {
-        //         console.error("Reservation Error:", error);
-        //         alert(error.message);
-        //         const btn = document.querySelector('button[onclick="validateStep2()"]');
-        //         btn.innerHTML = `Pay Now`;
-        //         btn.disabled = false;
-        //     }
-        // }
     </script>
 </body>
 </html>
