@@ -10,6 +10,7 @@ Route::post('/properties/{id}/quote', [PropertyController::class, 'getQuote'])->
 Route::post('/quotes/{quoteId}/upsells', [PropertyController::class, 'updateQuoteUpsells'])->name('quotes.upsells');
 Route::get('/checkout', [PropertyController::class, 'checkout'])->name('checkout');
 Route::get('/activities', [PropertyController::class, 'getActivities'])->name('activities');
+Route::get('/resort-map', [PropertyController::class, 'getResortMap'])->name('resort-map');
 
 // Test url
 Route::get('/test', function () {

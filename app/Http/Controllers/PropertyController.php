@@ -203,4 +203,9 @@ class PropertyController extends Controller
     {
         return view('activities',);
     }
+
+    public function getResortMap(Request $request)
+    {
+        return view('resort-map',);
+    }
 }
