@@ -224,44 +224,94 @@
             }
         };
         
-        window.toggleUpsell = function(btn) {
+        window.toggleUpsell = async function(btn) {
             const id = btn.getAttribute('data-id');
             const title = btn.getAttribute('data-title');
-            const price = parseFloat(btn.getAttribute('data-price'));
+            const quoteId = "{{ $quote['_id'] }}";
             
+            // Toggle local state
             if (addedUpsells[id]) {
-                // Remove it
                 delete addedUpsells[id];
-                btn.textContent = 'Add';
-                btn.classList.remove('bg-emerald-600', 'text-white');
-                btn.classList.add('text-emerald-600', 'bg-transparent');
-                document.getElementById('upsell-summary-item-' + id)?.remove();
             } else {
-                // Add it
-                addedUpsells[id] = { title, price };
-                btn.textContent = 'Added';
-                btn.classList.remove('text-emerald-600', 'bg-transparent');
-                btn.classList.add('bg-emerald-600', 'text-white');
+                addedUpsells[id] = true;
+            }
+
+            // Update button UI to loading
+            const originalText = btn.textContent;
+            btn.textContent = 'Updating...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/quotes/${quoteId}/upsells`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        additionalFeeIds: Object.keys(addedUpsells)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update upsells');
+                }
+
+                const updatedQuote = await response.json();
                 
-                // Add to summary DOM
-                const summaryList = document.getElementById('price-details-list');
-                const div = document.createElement('div');
-                div.id = 'upsell-summary-item-' + id;
-                div.className = 'flex justify-between text-sm text-gray-600 upsell-summary-row';
-                div.innerHTML = `<span>${title}</span><span>+$${price.toFixed(2)}</span>`;
-                summaryList.appendChild(div);
+                // Update button style based on new state
+                if (addedUpsells[id]) {
+                    btn.textContent = 'Added';
+                    btn.classList.remove('text-emerald-600', 'bg-transparent');
+                    btn.classList.add('bg-emerald-600', 'text-white');
+                } else {
+                    btn.textContent = 'Add';
+                    btn.classList.remove('bg-emerald-600', 'text-white');
+                    btn.classList.add('text-emerald-600', 'bg-transparent');
+                }
+
+                // Update Price Breakdown UI from updatedQuote
+                const ratePlanNode = updatedQuote?.rates?.ratePlans?.[0]?.ratePlan?.money;
+                if (ratePlanNode) {
+                    const invoiceItems = ratePlanNode.invoiceItems || [];
+                    const subTotal = ratePlanNode.subTotalPrice || 0;
+                    const taxes = ratePlanNode.totalTaxes || 0;
+                    const newTotal = subTotal + taxes;
+
+                    // Re-render invoice items list
+                    const summaryList = document.getElementById('price-details-list');
+                    summaryList.innerHTML = '<h4 class="text-xs font-bold uppercase tracking-widest text-gray-400">Price Details</h4>';
+                    
+                    invoiceItems.forEach(item => {
+                        const titleStr = item.title.toLowerCase().replace(/_/g, ' ');
+                        const amountStr = item.amount.toFixed(2);
+                        summaryList.innerHTML += `
+                            <div class="flex justify-between text-sm text-gray-600 capitalize">
+                                <span>${titleStr}</span>
+                                <span>$${amountStr}</span>
+                            </div>
+                        `;
+                    });
+
+                    // Update Total
+                    document.getElementById('order-total-amount').textContent = '$' + newTotal.toFixed(2);
+                    window.checkoutTotalAmount = newTotal;
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert('Could not update upsells. Please try again.');
+                // Revert local state
+                if (addedUpsells[id]) {
+                    delete addedUpsells[id];
+                    btn.textContent = 'Add';
+                } else {
+                    addedUpsells[id] = true;
+                    btn.textContent = 'Added';
+                }
+            } finally {
+                btn.disabled = false;
             }
-            
-            updateTotal();
-        };
-        
-        window.updateTotal = function() {
-            let newTotal = baseTotal;
-            for (let key in addedUpsells) {
-                newTotal += addedUpsells[key].price;
-            }
-            document.getElementById('order-total-amount').textContent = '$' + newTotal.toFixed(2);
-            window.checkoutTotalAmount = newTotal;
         };
         
         window.checkoutTotalAmount = baseTotal;

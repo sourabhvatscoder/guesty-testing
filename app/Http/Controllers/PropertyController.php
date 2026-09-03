@@ -171,6 +171,34 @@ class PropertyController extends Controller
         return view('checkout', compact('property', 'quote', 'request', 'upsells'));
     }
 
+        public function updateQuoteUpsells(Request $request, $quoteId)
+    {
+        $validated = $request->validate([
+            'additionalFeeIds' => 'array',
+            'additionalFeeIds.*' => 'string'
+        ]);
+
+        $upsellResponse = Http::withToken(env('GUESTY_API_TOKEN'))
+            ->acceptJson()
+            ->post("https://booking.guesty.com/api/reservations/upsell/{$quoteId}", [
+                'additionalFeeIds' => $validated['additionalFeeIds'] ?? []
+            ]);
+
+        if ($upsellResponse->failed()) {
+            return response()->json(['error' => 'Failed to update upsells.'], 422);
+        }
+
+        $quoteResponse = Http::withToken(env('GUESTY_API_TOKEN'))
+            ->acceptJson()
+            ->get("https://booking.guesty.com/api/reservations/quotes/{$quoteId}");
+
+        if ($quoteResponse->failed()) {
+            return response()->json(['error' => 'Failed to fetch updated quote.'], 422);
+        }
+
+        return response()->json($quoteResponse->json());
+    }
+
     public function getActivities(Request $request)
     {
         return view('activities',);
