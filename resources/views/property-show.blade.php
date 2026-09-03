@@ -7,16 +7,7 @@
         <div class="mb-6">
             <h1 class="text-3xl font-serif font-bold text-gray-900">
                 {{ $property['title'] ?? 'Untitled Property' }} 
-                <span class="text-gray-400 font-normal px-2">|</span>
-                {{ $property['tags'][0] ?? $property['propertyType'] ?? 'Vacation Rental' }}
             </h1>
-            
-            <div class="flex items-center mt-2 text-sm text-gray-700 font-medium">
-                <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                </svg>
-                {{ $property['address']['full'] ?? 'Address not available' }}
-            </div>
         </div>
 
         @php
@@ -275,8 +266,12 @@
 
                     <div id="validationAlert" class="hidden text-xs font-semibold p-3.5 bg-rose-50 text-rose-600 rounded-xl border border-rose-100 animate-pulse"></div>
 
-                    <div id="invoiceBreakdown" class="hidden space-y-4 pt-2 border-t border-gray-100">
-                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400">Price Breakdown</h4>
+                    <div id="invoiceBreakdown" class="hidden space-y-4 pt-4 border-t border-gray-100">
+                        <div id="nightsBreakdown" class="text-sm font-semibold text-gray-800 bg-gray-50/80 border border-gray-100 p-3 rounded-lg flex justify-between items-center">
+                            <!-- e.g. 7 Sep - 8 Sep → 1 night -->
+                        </div>
+                        
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mt-2">Price Breakdown</h4>
                         <div id="breakdownLines" class="space-y-2.5 text-sm font-medium text-gray-600"></div>
                         <div class="border-t border-gray-100 pt-4 flex justify-between font-bold text-gray-900 text-base">
                             <span>Total</span>
@@ -362,6 +357,7 @@
         const guestsInput = document.getElementById('guestsCount');
         const validationAlert = document.getElementById('validationAlert');
         const invoiceBreakdown = document.getElementById('invoiceBreakdown');
+        const nightsBreakdown = document.getElementById('nightsBreakdown');
         const breakdownLines = document.getElementById('breakdownLines');
         const calculatedTotal = document.getElementById('calculatedTotal');
         const submitBtn = document.getElementById('submitBookingBtn');
@@ -542,6 +538,25 @@
         }
 
         function renderInvoice(payload) {
+            const checkIn = document.getElementById('checkInDate').value;
+            const checkOut = document.getElementById('checkOutDate').value;
+
+            // Calculate nights
+            if (checkIn && checkOut) {
+                const ciParts = checkIn.split('-');
+                const coParts = checkOut.split('-');
+                const ciDate = new Date(ciParts[0], ciParts[1] - 1, ciParts[2]);
+                const coDate = new Date(coParts[0], coParts[1] - 1, coParts[2]);
+                
+                const timeDiff = coDate.getTime() - ciDate.getTime();
+                const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                const ciStr = ciDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                const coStr = coDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+                nightsBreakdown.innerHTML = `<span>${ciStr} &ndash; ${coStr}</span> <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs font-bold">${nights} night${nights > 1 ? 's' : ''}</span>`;
+            }
+
             const ratePlanNode = payload.rates?.ratePlans?.[0]?.ratePlan?.money;
             if (!ratePlanNode || !ratePlanNode.invoiceItems) {
                 showError("Could not retrieve clean line item quote structures.");
