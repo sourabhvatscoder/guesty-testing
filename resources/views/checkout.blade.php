@@ -61,11 +61,65 @@
                         
                         <div class="pt-4">
                             <button type="button" onclick="validateStep1()" class="w-full sm:w-auto px-8 py-3.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl transition-all text-sm shadow-md">
-                                Next: Payment Details
+                                Next: Additional Services
                             </button>
                         </div>
                     </div>
                 </div>
+
+                @if(isset($upsells) && count($upsells) > 0)
+                <!-- STEP 1.5: ADD TO YOUR STAY -->
+                <div id="step-upsells-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm opacity-50 pointer-events-none transition-all duration-300">
+                    <h2 class="text-xl font-bold mb-6">Add to your stay</h2>
+                    
+                    <div class="space-y-4">
+                        @foreach($upsells as $upsell)
+                        @php 
+                            // Extract basic details safely
+                            $upsellId = $upsell['_id'] ?? $upsell['id'] ?? uniqid('upsell_');
+                            $upsellTitle = $upsell['title'] ?? $upsell['name'] ?? 'Additional Service';
+                            $upsellDesc = $upsell['upsell']['description'] ?? '';
+                            $upsellPrice = $upsell['price'] ?? 0;
+                            $upsellImage = $upsell['upsell']['images'][0]['url'] ?? $upsell['image'] ?? null;
+                        @endphp
+                        <div class="flex flex-col sm:flex-row gap-4 border border-gray-100 p-4 rounded-xl items-center justify-between" id="upsell-card-{{ $upsellId }}">
+                            <div class="flex gap-4 items-center w-full sm:w-auto">
+                                @if($upsellImage)
+                                <img src="{{ $upsellImage }}" class="w-16 h-16 object-cover rounded-lg">
+                                @else
+                                <div class="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                </div>
+                                @endif
+                                <div>
+                                    <h4 class="font-bold text-gray-900">{{ $upsellTitle }}</h4>
+                                    @if($upsellDesc)
+                                    <p class="text-xs text-gray-500 mt-0.5 line-clamp-2 max-w-sm">{{ $upsellDesc }}</p>
+                                    @endif
+                                    <p class="text-emerald-600 font-semibold text-sm mt-1">
+                                        +${{ number_format((float)$upsellPrice, 2) }}
+                                    </p>
+                                </div>
+                            </div>
+                            <button type="button" 
+                                class="upsell-toggle-btn px-6 py-2 border border-emerald-600 text-emerald-600 rounded-lg text-sm font-bold hover:bg-emerald-50 transition-colors w-full sm:w-auto"
+                                data-id="{{ $upsellId }}"
+                                data-title="{{ $upsellTitle }}"
+                                data-price="{{ (float)$upsellPrice }}"
+                                onclick="toggleUpsell(this)">
+                                Add
+                            </button>
+                        </div>
+                        @endforeach
+                    </div>
+                    
+                    <div class="pt-6 mt-6 border-t border-gray-100">
+                        <button type="button" onclick="validateStepUpsells()" class="w-full sm:w-auto px-8 py-3.5 bg-gray-900 hover:bg-gray-800 text-white font-semibold rounded-xl transition-all text-sm shadow-md">
+                            Next: Payment Details
+                        </button>
+                    </div>
+                </div>
+                @endif
 
                 <!-- STEP 2: PAYMENT INFORMATION -->
                 <div id="step2-container" class="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm opacity-50 pointer-events-none transition-all duration-300">
@@ -105,7 +159,7 @@
                     </div>
 
                     <!-- Price Breakdown -->
-                    <div class="space-y-3">
+                    <div class="space-y-3" id="price-details-list">
                         <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400">Price Details</h4>
                         
                         @php
@@ -125,13 +179,116 @@
                     <!-- Total -->
                     <div class="border-t border-gray-100 pt-4 flex justify-between font-bold text-gray-900 text-lg">
                         <span>Total (USD)</span>
-                        <span>${{ number_format($total, 2) }}</span>
+                        <span id="order-total-amount">${{ number_format($total, 2) }}</span>
                     </div>
 
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Checkout UI Logic -->
+    <script>
+        let baseTotal = {{ $total }};
+        let addedUpsells = {};
+        
+        const setError = (id, show) => {
+            const el = document.getElementById(id);
+            const msg = el.nextElementSibling;
+            if (show) {
+                el.classList.add('input-error');
+                msg.classList.remove('hidden');
+            } else {
+                el.classList.remove('input-error');
+                msg.classList.add('hidden');
+            }
+        };
+
+        const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        const isValidPhone = (phone) => phone.replace(/[^0-9]/g,"").length >= 10;
+
+        window.validateStep1 = function() {
+            let isValid = true;
+            
+            const fName = document.getElementById('firstName').value.trim();
+            const lName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!fName) { setError('firstName', true); isValid = false; } else setError('firstName', false);
+            if (!lName) { setError('lastName', true); isValid = false; } else setError('lastName', false);
+            if (!isValidEmail(email)) { setError('email', true); isValid = false; } else setError('email', false);
+            if (!isValidPhone(phone)) { setError('phone', true); isValid = false; } else setError('phone', false);
+
+            if (isValid) {
+                document.getElementById('step1-form').classList.add('hidden');
+                document.getElementById('step1-success').classList.remove('hidden');
+                
+                const stepUpsells = document.getElementById('step-upsells-container');
+                if (stepUpsells) {
+                    stepUpsells.classList.remove('opacity-50', 'pointer-events-none');
+                    stepUpsells.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    const step2 = document.getElementById('step2-container');
+                    step2.classList.remove('opacity-50', 'pointer-events-none');
+                    step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        };
+        
+        window.toggleUpsell = function(btn) {
+            const id = btn.getAttribute('data-id');
+            const title = btn.getAttribute('data-title');
+            const price = parseFloat(btn.getAttribute('data-price'));
+            
+            if (addedUpsells[id]) {
+                // Remove it
+                delete addedUpsells[id];
+                btn.textContent = 'Add';
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('text-emerald-600', 'bg-transparent');
+                document.getElementById('upsell-summary-item-' + id)?.remove();
+            } else {
+                // Add it
+                addedUpsells[id] = { title, price };
+                btn.textContent = 'Added';
+                btn.classList.remove('text-emerald-600', 'bg-transparent');
+                btn.classList.add('bg-emerald-600', 'text-white');
+                
+                // Add to summary DOM
+                const summaryList = document.getElementById('price-details-list');
+                const div = document.createElement('div');
+                div.id = 'upsell-summary-item-' + id;
+                div.className = 'flex justify-between text-sm text-gray-600 upsell-summary-row';
+                div.innerHTML = `<span>${title}</span><span>+$${price.toFixed(2)}</span>`;
+                summaryList.appendChild(div);
+            }
+            
+            updateTotal();
+        };
+        
+        window.updateTotal = function() {
+            let newTotal = baseTotal;
+            for (let key in addedUpsells) {
+                newTotal += addedUpsells[key].price;
+            }
+            document.getElementById('order-total-amount').textContent = '$' + newTotal.toFixed(2);
+            window.checkoutTotalAmount = newTotal;
+        };
+
+        window.validateStepUpsells = function() {
+            const stepUpsells = document.getElementById('step-upsells-container');
+            if (stepUpsells) {
+                stepUpsells.classList.add('opacity-50', 'pointer-events-none');
+            }
+            
+            const step2 = document.getElementById('step2-container');
+            step2.classList.remove('opacity-50', 'pointer-events-none');
+            step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        
+        window.checkoutTotalAmount = baseTotal;
+    </script>
 
     <!-- Javascript Validation Engine & Guesty SDK Integration -->
     <script type="module">
@@ -152,15 +309,15 @@
         window.validate = function() {
             guestyTokenization.validate();
             var payload = {
-                amount: Number("{{ $quote['rates']['ratePlans'][0]['ratePlan']['money']['hostPayout'] ?? 0 }}"),
+                amount: window.checkoutTotalAmount,
                 currency: "{{ $quote['rates']['ratePlans'][0]['ratePlan']['money']['currency'] ?? 'USD' }}",
                 listingId: "{{ $request->listing_id }}",
                 quoteId: "{{ $quote['_id'] }}",
                 guest: {
-                    firstName: 'test',
-                    lastName: 'test',
-                    email: 'test@example.com',
-                    phone: '1234567890'
+                    firstName: document.getElementById('firstName').value.trim() || 'test',
+                    lastName: document.getElementById('lastName').value.trim() || 'test',
+                    email: document.getElementById('email').value.trim() || 'test@example.com',
+                    phone: document.getElementById('phone').value.trim() || '1234567890'
                 }
             };
             var paymentResponse = guestyTokenization.submit(payload);

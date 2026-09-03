@@ -156,8 +156,19 @@ class PropertyController extends Controller
         }
 
         $quote = $response->json();
+        $inquiryId = $quote['rates']['ratePlans'][0]['inquiryId'] ?? null;
+        $upsells = [];
+        if ($inquiryId) {
+            $upsellResponse = Http::withToken(env('GUESTY_API_TOKEN'))
+                ->acceptJson()
+                ->get("https://booking.guesty.com/api/reservations/upsell/{$inquiryId}/{$id}/fee");
+                
+            if ($upsellResponse->successful()) {
+                $upsells = $upsellResponse->json();
+            }
+        }
 
-        return view('checkout', compact('property', 'quote', 'request'));
+        return view('checkout', compact('property', 'quote', 'request', 'upsells'));
     }
 
     public function getActivities(Request $request)
